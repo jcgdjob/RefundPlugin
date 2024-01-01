@@ -6,6 +6,8 @@ namespace Sylius\RefundPlugin\Event;
 
 use Sylius\RefundPlugin\Model\OrderItemUnitRefund;
 use Sylius\RefundPlugin\Model\ShipmentRefund;
+use Sylius\RefundPlugin\Model\OrderItemRefund;
+use Sylius\RefundPlugin\Model\OrderRefund;
 
 final class UnitsRefunded
 {
@@ -17,6 +19,12 @@ final class UnitsRefunded
 
     /** @var array|ShipmentRefund[] */
     private $shipments;
+
+    /** @var array|OrderItemRefund[] */
+    private $items;
+
+    /** @var array|OrderRefund[] */
+    private $orders;
 
     /** @var int */
     private $paymentMethodId;
@@ -34,6 +42,8 @@ final class UnitsRefunded
         string $orderNumber,
         array $units,
         array $shipments,
+        array $items,
+        array $orders,
         int $paymentMethodId,
         int $amount,
         string $currencyCode,
@@ -42,6 +52,8 @@ final class UnitsRefunded
         $this->orderNumber = $orderNumber;
         $this->units = $units;
         $this->shipments = $shipments;
+        $this->items = $items;
+        $this->orders = $orders;
         $this->paymentMethodId = $paymentMethodId;
         $this->amount = $amount;
         $this->currencyCode = $currencyCode;
@@ -63,6 +75,18 @@ final class UnitsRefunded
     public function shipments(): array
     {
         return $this->shipments;
+    }
+
+    /** @return array|OrderItemRefund[] */
+    public function items(): array
+    {
+        return $this->items;
+    }
+
+    /** @return array|OrderRefund[] */
+    public function orders(): array
+    {
+        return $this->orders;
     }
 
     public function paymentMethodId(): int

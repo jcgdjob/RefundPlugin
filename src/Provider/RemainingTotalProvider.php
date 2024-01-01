@@ -6,6 +6,8 @@ namespace Sylius\RefundPlugin\Provider;
 
 use Sylius\Component\Core\Model\AdjustmentInterface;
 use Sylius\Component\Core\Model\OrderItemUnitInterface;
+use Sylius\Component\Core\Model\OrderItemInterface;
+use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Sylius\RefundPlugin\Entity\RefundInterface;
 use Sylius\RefundPlugin\Model\RefundType;
@@ -17,6 +19,12 @@ final class RemainingTotalProvider implements RemainingTotalProviderInterface
     private $orderItemUnitRepository;
 
     /** @var RepositoryInterface */
+    private $orderItemRepository;
+
+    /** @var RepositoryInterface */
+    private $orderRepository;
+
+    /** @var RepositoryInterface */
     private $adjustmentRepository;
 
     /** @var RepositoryInterface */
@@ -24,10 +32,14 @@ final class RemainingTotalProvider implements RemainingTotalProviderInterface
 
     public function __construct(
         RepositoryInterface $orderItemUnitRepository,
+        RepositoryInterface $orderItemRepository,
+        RepositoryInterface $orderRepository,
         RepositoryInterface $adjustmentRepository,
         RepositoryInterface $refundRepository
     ) {
         $this->orderItemUnitRepository = $orderItemUnitRepository;
+        $this->orderItemRepository = $orderItemRepository;
+        $this->orderRepository = $orderRepository;
         $this->adjustmentRepository = $adjustmentRepository;
         $this->refundRepository = $refundRepository;
     }
@@ -60,13 +72,31 @@ final class RemainingTotalProvider implements RemainingTotalProviderInterface
             return $orderItemUnit->getTotal();
         }
 
-        /** @var AdjustmentInterface $shipment */
-        $shipment = $this->adjustmentRepository->findOneBy([
-            'id' => $id,
-            'type' => AdjustmentInterface::SHIPPING_ADJUSTMENT,
-        ]);
-        Assert::notNull($shipment);
+        if ($refundType->equals(RefundType::shipment())) {
+            /** @var AdjustmentInterface $shipment */
+            $shipment = $this->adjustmentRepository->findOneBy([
+                'id' => $id,
+                'type' => AdjustmentInterface::SHIPPING_ADJUSTMENT,
+            ]);
+            Assert::notNull($shipment);
 
-        return $shipment->getAmount();
+            return $shipment->getAmount();
+        }
+
+        if ($refundType->equals(RefundType::orderItem())) {
+            /** @var OrderItemInterface $orderItem */
+            $orderItem = $this->orderItemRepository->find($id);
+            Assert::notNull($orderItem);
+
+            return $orderItem->getTotal();
+        }
+
+        if ($refundType->equals(RefundType::order())) {
+            /** @var OrderInterface $order */
+            $order = $this->orderRepository->find($id);
+            Assert::notNull($order);
+
+            return $order->getTotal();
+        }
     }
 }
