@@ -22,6 +22,7 @@ final class OrderCreditMemoUnitGenerator implements CreditMemoUnitGeneratorInter
 
     public function generate(int $unitId, int $amount = null): CreditMemoUnitInterface
     {
+        $desc = 'Order changes';
         /** @var OrderInterface $order */
         $order = $this->orderRepository->find($unitId);
         Assert::notNull($order);
@@ -32,7 +33,7 @@ final class OrderCreditMemoUnitGenerator implements CreditMemoUnitGeneratorInter
 
         if ($amount === $total) {
             return new CreditMemoUnit(
-                'Order changes',//$order->getProductName(),
+                $desc,
                 $total,
                 $order->getTaxTotal()
             );
@@ -41,7 +42,7 @@ final class OrderCreditMemoUnitGenerator implements CreditMemoUnitGeneratorInter
         $taxTotal = (int) ($order->getTaxTotal() * ($amount / $total));
 
         return new CreditMemoUnit(
-            $order->getProductName(),
+            $desc,
             $amount,
             $taxTotal
         );
