@@ -46,6 +46,22 @@ final class RemainingTotalProvider implements RemainingTotalProviderInterface
 
     public function getTotalLeftToRefund(int $id, RefundType $type): int
     {
+        if ($type->equals(RefundType::orderItem())) {
+            /** @var OrderItemInterface $orderItem */
+            $orderItem = $this->orderItemRepository->find($id);
+            Assert::notNull($orderItem);
+
+            return $orderItem->getTotal();
+        }
+
+        if ($type->equals(RefundType::order())) {
+            /** @var OrderInterface $order */
+            $order = $this->orderRepository->find($id);
+            Assert::notNull($order);
+
+            return $order->getTotal();
+        }
+        
         $unitTotal = $this->getRefundUnitTotal($id, $type);
         $refunds = $this->refundRepository->findBy(['refundedUnitId' => $id, 'type' => $type->__toString()]);
 
